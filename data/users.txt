@@ -1,0 +1,3 @@
+ADMIN001|Admin User|admin@yummydish.lk|$2a$10$Nc32wz6DXKzTMv1h8eQcie1rlwaEHDN2ZCWV1Ce8QEVF.bs/2BF5C|+94812345678|YummyDish HQ Kandy|ADMIN|2026-05-04 08:55:14||||.|0
+DRIVER001|Kasun Perera|driver@yummydish.com|$2a$10$A/7ZMCGsRagajRqjlUXwzu1Lg1CMhRIgvf/em3fufnAU3Q5Zt2IzC|0714567890|Colombo 05|DRIVER|2024-01-01||||
+USR10655E21|Akila Weerasekara|akilaweerasekara89@gmail.com|$2a$10$avooVa3NzG8iOPOCxND3QuKcnwiAgsJnCrymCBxlO1ipfsFWu4yMG|0778809325|NO. 174/4, RATHUKOHODEEGALA, AKURANA|CUSTOMER|2026-05-06 14:31|||||0
