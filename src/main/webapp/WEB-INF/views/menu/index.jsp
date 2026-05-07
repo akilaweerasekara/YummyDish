@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
@@ -340,7 +340,7 @@ function doAddToCart(btn) {
   var qEl   = qtyId ? document.getElementById(qtyId) : null;
   var qty   = qEl ? (parseInt(qEl.textContent) || 1) : 1;
 
-  // Write to localStorage directly — works 100% regardless of Cart state
+  // Write to localStorage directly &mdash; works 100% regardless of Cart state
   try {
     var items = JSON.parse(localStorage.getItem('ydCart') || '[]');
     var ex = items.find(function(i) { return i.id === id; });
@@ -543,7 +543,7 @@ if (searchInput) {
     var val = this.value.trim();
     searchTimer = setTimeout(function() {
       if (val.length < 2 && val.length > 0) return; // wait for 2+ chars
-      fetch('/api/foods?search=' + encodeURIComponent(val) + '&category=${category}')
+      fetch('/api/foods?search=' + encodeURIComponent(val) + '&category=${category}&sort=' + encodeURIComponent('${sort}' === 'asc' ? 'price_asc' : '${sort}' === 'desc' ? 'price_desc' : 'none'))
         .then(function(r){ return r.json(); })
         .then(function(foods) { renderLiveResults(foods, val); })
         .catch(function(){});

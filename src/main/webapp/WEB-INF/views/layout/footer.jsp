@@ -226,7 +226,7 @@ function dismissNotif(btn) {
   setTimeout(function() { if (n.parentNode) n.parentNode.removeChild(n); }, 320);
 }
 
-// ── Custom cursor (desktop only) — deferred to avoid blocking render ──
+// ── Custom cursor (desktop only) &mdash; deferred to avoid blocking render ──
 document.addEventListener('DOMContentLoaded', function() {
   if (!window.matchMedia('(pointer:fine)').matches) return;
   var cursor = document.getElementById('yd-cursor');

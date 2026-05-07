@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
@@ -423,7 +423,7 @@
           <div style="text-align:center;padding:56px 20px;color:var(--c-muted);">
             <div style="font-size:4rem;margin-bottom:16px;">&#x1F4EB;</div>
             <h5 style="color:var(--c-text);margin-bottom:8px;">No Scheduled Orders Yet</h5>
-            <p style="font-size:.875rem;max-width:300px;margin:0 auto 20px;">Plan ahead — schedule a delivery for any date up to 7 days in advance.</p>
+            <p style="font-size:.875rem;max-width:300px;margin:0 auto 20px;">Plan ahead &mdash; schedule a delivery for any date up to 7 days in advance.</p>
             <button onclick="showTab('new')" class="yd-btn yd-btn-primary" style="width:auto;padding:10px 24px;">
               <i class="bi bi-plus-lg me-1"></i>Create Schedule
             </button>

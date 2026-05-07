@@ -153,12 +153,15 @@ class AdminAuthController {
     private final FoodItemService foodService;
     private final FileStorageUtil fsu;
     private final OfferService offerService;
+    private final com.yummydish.util.OrderQueue orderQueue;
 
     @Autowired
     AdminAuthController(UserService us, FoodItemService fs,
-                        FileStorageUtil fsu, OfferService os) {
+                        FileStorageUtil fsu, OfferService os,
+                        com.yummydish.util.OrderQueue oq) {
         this.userService = us; this.foodService = fs;
         this.fsu = fsu;       this.offerService = os;
+        this.orderQueue = oq;
     }
 
     private boolean isAdmin(HttpSession s) {
@@ -319,6 +322,16 @@ class AdminAuthController {
             Order o = Order.fromLine(line);
             o.setStatus(status);
             o.setUpdatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+
+            // ── OrderQueue: dequeue when kitchen starts cooking ────────────
+            // When admin moves order to COOKING it leaves the waiting queue
+            // and enters active kitchen processing — FIFO order preserved.
+            if (Order.COOKING.equals(status)) {
+                orderQueue.removeById(orderId);
+                System.out.println("[OrderQueue] Dequeued " + orderId
+                    + " → COOKING | Remaining in queue: " + orderQueue.size());
+            }
+
             // Auto-assign least-loaded driver when moving to READY/HANDOVER
             if ((Order.READY.equals(status) || Order.HANDOVER.equals(status))
                     && (o.getDriverId() == null || o.getDriverId().isBlank())) {
@@ -758,20 +771,61 @@ class ApiController {
     private final OfferService offerService;
     private final UserService userService;
 
-    @Autowired ApiController(FoodItemService f, FileStorageUtil fs, OfferService o, UserService us) {
-        this.foodService = f; this.fsu = fs; this.offerService = o; this.userService = us;
+    /**
+     * OrderQueue — Data Structure: Queue (FIFO)
+     * Manages order processing in arrival sequence.
+     * Injected as a Spring singleton so the same queue instance is shared
+     * across all requests in the application lifecycle.
+     */
+    private final com.yummydish.util.OrderQueue orderQueue;
+
+    @Autowired ApiController(FoodItemService f, FileStorageUtil fs, OfferService o,
+                             UserService us, com.yummydish.util.OrderQueue oq) {
+        this.foodService = f; this.fsu = fs; this.offerService = o;
+        this.userService = us; this.orderQueue = oq;
+        // Restore queue from persisted orders on startup
+        restoreQueueFromStorage();
+    }
+
+    /** Rebuild the in-memory queue from saved PENDING orders on server start. */
+    private void restoreQueueFromStorage() {
+        try {
+            List<Order> pending = fsu.readAll(fsu.getOrdersFile()).stream()
+                .map(line -> { try { return Order.fromLine(line); } catch(Exception e) { return null; } })
+                .filter(o -> o != null && Order.PENDING.equals(o.getStatus()))
+                .sorted(java.util.Comparator.comparing(o -> o.getCreatedAt() != null ? o.getCreatedAt() : ""))
+                .collect(Collectors.toList());
+            orderQueue.restoreFromStorage(pending);
+            System.out.println("[OrderQueue] Restored " + pending.size() + " pending order(s) from storage.");
+        } catch (Exception e) {
+            System.err.println("[OrderQueue] Could not restore from storage: " + e.getMessage());
+        }
     }
 
     @GetMapping("/foods")
     public ResponseEntity<?> foods(
-            @RequestParam(defaultValue = "All") String category,
-            @RequestParam(defaultValue = "") String search) {
+            @RequestParam(defaultValue = "All")  String category,
+            @RequestParam(defaultValue = "")     String search,
+            @RequestParam(defaultValue = "none") String sort) {
+
         List<FoodItem> items;
         if (!search.isBlank()) {
             items = foodService.search(search);
         } else {
-            items = "All".equals(category) ? foodService.getAll() : foodService.getByCategory(category);
+            items = "All".equals(category)
+                ? foodService.getAll()
+                : foodService.getByCategory(category);
         }
+
+        // ── QuickSort: sort by price when requested ────────────────────────
+        // Uses custom QuickSort implementation (O(n log n) average-case)
+        // instead of Java's built-in sort — see com.yummydish.util.QuickSort
+        if ("price_asc".equals(sort)) {
+            com.yummydish.util.QuickSort.sortByPriceAscending(items);
+        } else if ("price_desc".equals(sort)) {
+            com.yummydish.util.QuickSort.sortByPriceDescending(items);
+        }
+
         List<Map<String, Object>> result = new ArrayList<>();
         for (FoodItem f : items) {
             Map<String, Object> map = new LinkedHashMap<>();
@@ -795,6 +849,29 @@ class ApiController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * GET /api/queue/status — returns current OrderQueue state for admin dashboard.
+     * Shows queue depth, next order to process, and all waiting orders in FIFO order.
+     */
+    @GetMapping("/queue/status")
+    public ResponseEntity<?> queueStatus(HttpSession s) {
+        if (s.getAttribute("admin") == null) return ResponseEntity.status(403).build();
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("queueDepth",  orderQueue.size());
+        resp.put("isEmpty",     orderQueue.isEmpty());
+        Order next = orderQueue.peek();
+        resp.put("nextOrderId", next != null ? next.getOrderId() : null);
+        resp.put("queue", orderQueue.snapshot().stream().map(o -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("orderId",   o.getOrderId());
+            m.put("customer",  o.getCustomerName());
+            m.put("total",     o.getTotalAmount());
+            m.put("createdAt", o.getCreatedAt());
+            return m;
+        }).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+    }
+
     @PostMapping("/validate-offer")
     public ResponseEntity<?> validateOffer(@RequestBody Map<String, Object> body, HttpSession s) {
         if (s.getAttribute("user") == null) return ResponseEntity.status(401).build();
@@ -810,6 +887,16 @@ class ApiController {
         try {
             Order o = buildOrder(body, u);
             fsu.appendLine(fsu.getOrdersFile(), o.toFileLine());
+
+            // ── OrderQueue: enqueue new STANDARD orders for FIFO processing ──
+            // Scheduled orders are queued when their scheduled time arrives,
+            // not immediately at placement.
+            if (!"SCHEDULED".equals(o.getOrderType())) {
+                orderQueue.enqueue(o);
+                System.out.println("[OrderQueue] Enqueued order " + o.getOrderId()
+                    + " | Queue depth: " + orderQueue.size());
+            }
+
             // For scheduled orders, also write to scheduled_orders.txt
             if ("SCHEDULED".equals(o.getOrderType()) && o.getScheduledFor() != null && !o.getScheduledFor().isEmpty()) {
                 fsu.appendLine(fsu.getScheduledOrdersFile(), o.toFileLine());
@@ -830,6 +917,7 @@ class ApiController {
             resp.put("estimatedEta",   o.getEstimatedEta());
             resp.put("driverName",     DRIVER_NAME);
             resp.put("driverContact",  DRIVER_CONTACT);
+            resp.put("queuePosition",  orderQueue.size()); // tell customer their queue position
             return ResponseEntity.ok(resp);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));

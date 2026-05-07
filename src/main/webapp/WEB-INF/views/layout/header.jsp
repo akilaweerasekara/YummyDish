@@ -1,3 +1,4 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c"  uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
@@ -6,7 +7,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#FF6B35">
-<title><c:out value="${not empty pageTitle ? pageTitle : 'Menu'}"/> — YummyDish</title>
+<title><c:out value="${not empty pageTitle ? pageTitle : 'YummyDish'}"/> &mdash; YummyDish</title>
 <!-- Futuristic fonts: Syne display + DM Sans body + DM Mono data -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,11 +23,11 @@
   if(t==='dark') document.documentElement.setAttribute('data-theme','dark');
 })();
 window.FB_API_KEY='${firebaseApiKey}';
-// Leaflet is synchronous — always ready
+// Leaflet is synchronous &mdash; always ready
 window.mapsLoaded=true;
 function onMapsReady(fn){ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',fn);}else{fn();} }
 </script>
-<!-- Leaflet — free maps, no API key needed -->
+<!-- Leaflet &mdash; free maps, no API key needed -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
