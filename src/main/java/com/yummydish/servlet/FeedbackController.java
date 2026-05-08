@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 // ── Global model attributes injected into every JSP ──────────────
 @org.springframework.web.bind.annotation.ControllerAdvice
 
-@Controller
 class ExtraController {
     private final FoodItemService foodService;
     private final FileStorageUtil fsu;
@@ -28,6 +27,7 @@ class ExtraController {
     @Autowired ExtraController(FoodItemService fs, FileStorageUtil fsu) {
         this.foodService = fs; this.fsu = fsu;
     }
+
 
     @GetMapping("/about")   public String about(HttpSession s, Model m)  { m.addAttribute("user", s.getAttribute("user")); return "about/index"; }
     @GetMapping("/reviews") public String reviews(HttpSession s, Model m) {
@@ -51,51 +51,5 @@ class ExtraController {
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         m.addAttribute("success", "Thank you! We'll get back to you soon.");
         return "contact/index";
-    }
-
-    @GetMapping("/group")    public String group(HttpSession s, Model m) {
-        if (s.getAttribute("user") == null) return "redirect:/login";
-        m.addAttribute("user", s.getAttribute("user")); m.addAttribute("foods", foodService.getAvailable());
-        return "group/index";
-    }
-    @GetMapping("/schedule") public String schedule(HttpSession s, Model m) {
-        if (s.getAttribute("user") == null) return "redirect:/login";
-        User u = (User) s.getAttribute("user");
-        List<Order> scheduledOrders = new java.util.ArrayList<>();
-        try {
-            scheduledOrders = fsu.readAll(fsu.getOrdersFile()).stream()
-                .map(line -> { try { return Order.fromLine(line); } catch(Exception e) { return null; } })
-                .filter(Objects::nonNull)
-                .filter(o -> u.getId().equals(o.getCustomerId()) && "SCHEDULED".equals(o.getOrderType()))
-                .sorted(Comparator.comparing(o -> o.getCreatedAt() != null ? o.getCreatedAt() : "", Comparator.reverseOrder()))
-                .collect(Collectors.toList());
-        } catch (Exception e) {
-            System.err.println("[Schedule] Error loading scheduled orders: " + e.getMessage());
-        }
-        m.addAttribute("user",            u);
-        m.addAttribute("foods",           foodService.getAvailable());
-        m.addAttribute("scheduledOrders", scheduledOrders);
-        return "schedule/index";
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// REST API
-// ═══════════════════════════════════════════════════════════════════
-class YummyDishErrorController implements org.springframework.boot.web.servlet.error.ErrorController {
-    @org.springframework.web.bind.annotation.GetMapping
-    public String handleError(jakarta.servlet.http.HttpServletRequest req, org.springframework.ui.Model m) {
-        Object code = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_STATUS_CODE_ATTRIBUTE);
-        Object msg  = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_MESSAGE_ATTRIBUTE);
-        Object ex   = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_EXCEPTION_ATTRIBUTE);
-        // Log the real exception to console for debugging
-        if (ex instanceof Throwable t) {
-            System.err.println("[YummyDish ERROR] " + t.getClass().getName() + ": " + t.getMessage());
-            t.printStackTrace();
-        }
-        String displayMsg = (msg != null && !msg.toString().isBlank()) ? msg.toString() : "An unexpected error occurred";
-        m.addAttribute("errorCode",    code != null ? code.toString() : "500");
-        m.addAttribute("errorMessage", displayMsg);
-        return "error";
     }
 }
