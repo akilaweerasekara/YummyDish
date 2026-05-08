@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 // ── Global model attributes injected into every JSP ──────────────
 @org.springframework.web.bind.annotation.ControllerAdvice
 
-@Controller
 class CheckoutController {
     @GetMapping("/cart") public String cart(HttpSession s, Model m) {
         if (s.getAttribute("user") == null) return "redirect:/login";
@@ -32,10 +31,6 @@ class CheckoutController {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// ACCOUNT — customer profile (no driver section)
-// ═══════════════════════════════════════════════════════════════════
-@RestController @RequestMapping("/api")
 class ApiController {
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final String DRIVER_NAME    = "Kasun Perera";
@@ -711,8 +706,3 @@ class ApiController {
         Object v = m.get(k); return v instanceof String str ? str : def;
     }
 }
-
-
-// ── Custom Error Controller — replaces Spring white-label page ────
-@org.springframework.stereotype.Controller
-@org.springframework.web.bind.annotation.RequestMapping("/error")
