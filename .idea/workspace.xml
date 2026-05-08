@@ -13,6 +13,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+<<<<<<< Updated upstream
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
     &quot;state&quot;: &quot;OPEN&quot;,
@@ -28,6 +29,23 @@
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
 }</component>
+=======
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "IT25101779"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/akilaweerasekara/YummyDish.git",
+    "accountId": "87e0ee7a-0c68-4ed3-9e41-62c80afeb9c7"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 5
+}]]></component>
+>>>>>>> Stashed changes
   <component name="ProjectId" id="3DPy6sNet9Q4cWzqyanHTfx5Hh4" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -38,10 +56,14 @@
     "Application.YummyDishApplication.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+<<<<<<< Updated upstream
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "Spring Boot.YummyDishApplication.executor": "Run",
     "git-widget-placeholder": "main",
+=======
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+>>>>>>> Stashed changes
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/Akila/Desktop/YummyDish_Hosted",
     "nodejs_package_manager_path": "npm",
@@ -80,7 +102,10 @@
       <option name="presentableId" value="Default" />
       <updated>1778197826739</updated>
       <workItem from="1778197828334" duration="835000" />
+<<<<<<< Updated upstream
       <workItem from="1778198688790" duration="350000" />
+=======
+>>>>>>> Stashed changes
     </task>
     <servers />
   </component>
