@@ -20,14 +20,14 @@ import java.util.stream.Collectors;
 // ── Global model attributes injected into every JSP ──────────────
 @org.springframework.web.bind.annotation.ControllerAdvice
 
-class ExtraController {
+@Controller
+class AdvancedOrderController {
     private final FoodItemService foodService;
     private final FileStorageUtil fsu;
 
-    @Autowired ExtraController(FoodItemService fs, FileStorageUtil fsu) {
+    @Autowired AdvancedOrderController(FoodItemService fs, FileStorageUtil fsu) {
         this.foodService = fs; this.fsu = fsu;
     }
-
 
     @GetMapping("/group")    public String group(HttpSession s, Model m) {
         if (s.getAttribute("user") == null) return "redirect:/login";

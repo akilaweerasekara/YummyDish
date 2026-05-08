@@ -20,14 +20,14 @@ import java.util.stream.Collectors;
 // ── Global model attributes injected into every JSP ──────────────
 @org.springframework.web.bind.annotation.ControllerAdvice
 
-class ExtraController {
+@Controller
+class FeedbackController {
     private final FoodItemService foodService;
     private final FileStorageUtil fsu;
 
-    @Autowired ExtraController(FoodItemService fs, FileStorageUtil fsu) {
+    @Autowired FeedbackController(FoodItemService fs, FileStorageUtil fsu) {
         this.foodService = fs; this.fsu = fsu;
     }
-
 
     @GetMapping("/about")   public String about(HttpSession s, Model m)  { m.addAttribute("user", s.getAttribute("user")); return "about/index"; }
     @GetMapping("/reviews") public String reviews(HttpSession s, Model m) {
