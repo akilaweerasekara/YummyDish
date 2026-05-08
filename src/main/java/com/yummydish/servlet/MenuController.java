@@ -20,7 +20,25 @@ import java.util.stream.Collectors;
 // ── Global model attributes injected into every JSP ──────────────
 @org.springframework.web.bind.annotation.ControllerAdvice
 
-@Controller
+class GlobalAdvice {
+    @Value("${google.maps.api.key:}")    private String mapsKey;
+    @Value("${firebase.api.key:}")       private String fbKey;
+    @Value("${firebase.auth.domain:}")   private String fbDomain;
+    @Value("${firebase.project.id:}")    private String fbProject;
+    @Value("${google.oauth.client.id:}") private String googleClientId;
+    @Value("${google.oauth.client.id:}") private String googleOAuthClientId;
+
+    private final OfferService offerService;
+    @Autowired GlobalAdvice(OfferService offerService) { this.offerService = offerService; }
+
+    @ModelAttribute("googleMapsApiKey")      public String mapsKey()          { return mapsKey; }
+    @ModelAttribute("googleOAuthClientId")   public String googleOAuthClientId() { return googleOAuthClientId; }
+    @ModelAttribute("firebaseApiKey")     public String fbKey()     { return fbKey; }
+    @ModelAttribute("firebaseAuthDomain") public String fbDomain()  { return fbDomain; }
+    @ModelAttribute("firebaseProjectId")  public String fbProject() { return fbProject; }
+    @ModelAttribute("activeOffers")       public List<Offer> offers(){ return offerService.getActive(); }
+}
+
 class MenuController {
     private final FoodItemService foodService;
     @Autowired MenuController(FoodItemService fs) { this.foodService = fs; }
@@ -51,7 +69,3 @@ class MenuController {
         return "menu/food-detail";
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════
-// CHECKOUT
-// ═══════════════════════════════════════════════════════════════════
