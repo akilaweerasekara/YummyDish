@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 // ── Global model attributes injected into every JSP ──────────────
 @org.springframework.web.bind.annotation.ControllerAdvice
 
-@Controller
-@RequestMapping("/driver")
 class DriverController {
     private final UserService userService;
     private final FileStorageUtil fsu;
@@ -122,10 +120,6 @@ class DriverController {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// MENU
-// ═══════════════════════════════════════════════════════════════════
-@Controller @RequestMapping("/activity")
 class ActivityController {
     private final FileStorageUtil fsu;
     @Autowired ActivityController(FileStorageUtil f) { this.fsu = f; }
@@ -160,7 +154,3 @@ class ActivityController {
         return "activity/order-detail";
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════
-// EXTRA PAGES — about, contact, reviews, group, schedule
-// ═══════════════════════════════════════════════════════════════════
