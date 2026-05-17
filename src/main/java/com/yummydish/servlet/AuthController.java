@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 // ── Global model attributes injected into every JSP ──────────────
 @org.springframework.web.bind.annotation.ControllerAdvice
-
+@Controller
 class AuthController {
     private final UserService userService;
     @Autowired AuthController(UserService us) { this.userService = us; }
@@ -121,6 +121,8 @@ class AuthController {
     public String logout(HttpSession s) { s.invalidate(); return "redirect:/login"; }
 }
 
+@Controller
+@RequestMapping("/account")
 class AccountController {
     private final UserService userService;
     @Autowired AccountController(UserService us) { this.userService = us; }
@@ -190,6 +192,8 @@ class AccountController {
     }
 }
 
+@Controller
+@RequestMapping("/admin")
 class AdminAuthController {
     private final UserService userService;
     private final FoodItemService foodService;
@@ -366,8 +370,6 @@ class AdminAuthController {
             o.setUpdatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 
             // ── OrderQueue: dequeue when kitchen starts cooking ────────────
-            // When admin moves order to COOKING it leaves the waiting queue
-            // and enters active kitchen processing — FIFO order preserved.
             if (Order.COOKING.equals(status)) {
                 orderQueue.removeById(orderId);
                 System.out.println("[OrderQueue] Dequeued " + orderId
@@ -465,23 +467,5 @@ class AdminAuthController {
             }
         }
         return "redirect:/admin/dashboard?tab=feedback";
-    }
-}
-
-class YummyDishErrorController implements org.springframework.boot.web.servlet.error.ErrorController {
-    @org.springframework.web.bind.annotation.GetMapping
-    public String handleError(jakarta.servlet.http.HttpServletRequest req, org.springframework.ui.Model m) {
-        Object code = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_STATUS_CODE_ATTRIBUTE);
-        Object msg  = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_MESSAGE_ATTRIBUTE);
-        Object ex   = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_EXCEPTION_ATTRIBUTE);
-        // Log the real exception to console for debugging
-        if (ex instanceof Throwable t) {
-            System.err.println("[YummyDish ERROR] " + t.getClass().getName() + ": " + t.getMessage());
-            t.printStackTrace();
-        }
-        String displayMsg = (msg != null && !msg.toString().isBlank()) ? msg.toString() : "An unexpected error occurred";
-        m.addAttribute("errorCode",    code != null ? code.toString() : "500");
-        m.addAttribute("errorMessage", displayMsg);
-        return "error";
     }
 }
